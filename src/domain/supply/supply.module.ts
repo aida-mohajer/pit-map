@@ -8,15 +8,34 @@ import { TypeOrmConfigModule } from 'src/bootstrap/typeorm-config/typeorm-config
 import { SupplyRepository } from './repositories/supply.repository';
 import { SupplyDetails } from './entities/supply-details.entity';
 import { SupplyDetailsRepository } from './repositories/supply-details.repository';
+import { DataSource } from 'typeorm';
 
 @Module({
-  imports: [TypeOrmModule.forFeature( [Supply,SupplyDetails,SupplyRepository,SupplyDetailsRepository]),
-  TypeOrmConfigModule
-],
+  imports: [
+    TypeOrmModule.forFeature([
+      Supply,
+      SupplyDetails,
+      SupplyRepository,
+      SupplyDetailsRepository,
+    ]),
+    TypeOrmConfigModule,
+  ],
   controllers: [SupplyController],
   exports: [SupplyService],
-  providers: [SupplyService, SupplyRepository,SupplyDetailsRepository
+  providers: [
+    SupplyService,
+    {
+      provide: SupplyRepository,
+      useFactory: (dataSource: DataSource) => new SupplyRepository(dataSource),
+      inject: [DataSource],
+    },
+    {
+      provide: SupplyDetailsRepository,
+      useFactory: (dataSource: DataSource) =>
+        new SupplyDetailsRepository(dataSource),
+      inject: [DataSource],
+    },
     //  AuthProfile
-    ],
+  ],
 })
 export class SupplyModule {}

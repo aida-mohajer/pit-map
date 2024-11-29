@@ -7,14 +7,16 @@ import {
   Query,
   Put,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { SupplyService } from './supply.service';
 import { Supply } from 'src/domain/supply/entities/supply.entity';
 import { CreateSupplyDto } from './dto/supply-dto/create-supply.dto';
 import { CreateSupplyDetailsDto } from './dto/supply-details-dto/create-supply-details-dto';
 import { SupplyDetails } from './entities/supply-details.entity';
 import { UpdateSupplyDto } from './dto/supply-dto/update-supply.dto';
+import { UpdateSupplyDetailsDto } from './dto/supply-details-dto/update-supply-details.dto';
 
 @Controller('supply')
 export class SupplyController {
@@ -22,8 +24,6 @@ export class SupplyController {
 
   @Post('create')
   createSupply(@Body() createSupplyDto: CreateSupplyDto): Promise<Supply> {
-    console.log('aaaaaaaaaaaaaaaaaa');
-    
     return this.supplyService.createSupply(createSupplyDto);
   }
 
@@ -40,27 +40,85 @@ export class SupplyController {
   }
 
   @Get(':supplyId')
-  getSupplyById(@Param() supplyId: number): Promise<Supply> {
+  @ApiParam({
+    name: 'supplyId',
+    type: Number,
+    required: true,
+    description: 'ID of the supply',
+  })
+  getSupplyById(
+    @Param('supplyId', ParseIntPipe) supplyId: number,
+  ): Promise<Supply> {
     return this.supplyService.getSupplyById(supplyId);
   }
 
-  @Put(':supplyId')
+  @Get('/details/:supplyId')
+  @ApiParam({
+    name: 'supplyId',
+    type: Number,
+    required: true,
+    description: 'ID of the supply',
+  })
+  getSupplyDetails(
+    @Param('supplyId', ParseIntPipe) supplyId: number,
+  ): Promise<SupplyDetails[]> {
+    return this.supplyService.getSupplyDetails(supplyId);
+  }
+
+  @Put('/update/:supplyId')
+  @ApiParam({
+    name: 'supplyId',
+    type: Number,
+    required: true,
+    description: 'ID of the supply',
+  })
   updateSupply(
-    @Param() supplyId: number,
+    @Param('supplyId', ParseIntPipe) supplyId: number,
     @Body() updateSupplyDto: UpdateSupplyDto,
   ): Promise<Supply> {
     return this.supplyService.updateSupply(supplyId, updateSupplyDto);
   }
 
-  @Delete(':supplyId')
-  deleteSupply(@Param() supplyId: number): Promise<Supply> {
+  @Put('/details/update/:supplyDetailsId')
+  @ApiParam({
+    name: 'supplyDetailsId',
+    type: Number,
+    required: true,
+    description: 'ID of the supplyDetails',
+  })
+  updateSupplyDetails(
+    @Param('supplyDetailsId', ParseIntPipe) supplyDetailsId: number,
+    @Body() updateSupplyDetailsDto: UpdateSupplyDetailsDto,
+  ): Promise<SupplyDetails> {
+    return this.supplyService.updateSupplyDetails(
+      supplyDetailsId,
+      updateSupplyDetailsDto,
+    );
+  }
+
+  @Delete('/delete/:supplyId')
+  @ApiParam({
+    name: 'supplyId',
+    type: Number,
+    required: true,
+    description: 'ID of the supply',
+  })
+  deleteSupply(
+    @Param('supplyId', ParseIntPipe) supplyId: number,
+  ): Promise<Supply> {
     return this.supplyService.deleteSupply(supplyId);
   }
 
-  // @Get('details/create')
-  // createSupplyDetails(
-  //   @Body() data: CreateSupplyDetailsDto,
-  // ): Promise<SupplyDetails> {
-  //   return this.supplyService.createSupplyDetails(data);
-  // }
+  @Delete('/details/delete/:supplyDetailsId')
+  @ApiParam({
+    name: 'supplyDetailsId',
+    type: Number,
+    required: true,
+    description: 'ID of the supplyDetails',
+  })
+  deleteSupplyDetails(
+    @Param('supplyDetailsId', ParseIntPipe) supplyDetailsId: number,
+  ): Promise<SupplyDetails> {
+    return this.supplyService.deleteSupplyDetails(supplyDetailsId);
+  }
 }

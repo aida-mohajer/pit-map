@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { DataSource, EntityRepository, Repository } from 'typeorm';
 import {
   Injectable,
   InternalServerErrorException,
@@ -8,31 +8,15 @@ import { Supply } from 'src/domain/supply/entities/supply.entity';
 import { CreateSupplyDto } from '../dto/supply-dto/create-supply.dto';
 import { UpdateSupplyDto } from '../dto/supply-dto/update-supply.dto';
 
-@Injectable()
+// @Injectable()
 export class SupplyRepository extends Repository<Supply> {
+  constructor(private dataSource: DataSource) {
+    super(Supply, dataSource.manager);
+  }
   async createSupply(createSupplyDto: CreateSupplyDto): Promise<Supply> {
     try {
-      // const supply = new Supply();
-      // Object.assign(supply, createSupplyDto);
-      const supply = this.create({
-        year:createSupplyDto.year,
-        month:createSupplyDto.month,
-        day:createSupplyDto.day,
-        material:createSupplyDto.material,
-        mine:createSupplyDto.mine,
-        weight:createSupplyDto.weight,
-        source:createSupplyDto.source,
-        density:createSupplyDto.density,
-        operation:createSupplyDto.operation,
-        service_number:createSupplyDto.services_number,
-        partner:createSupplyDto.partner,
-        status:createSupplyDto.status,
-        measure_type:createSupplyDto.measure_type,
-        description:createSupplyDto.description,
-
-      })
-      console.log(supply , 'mmmmmmmmmmmmm');
-      
+      const supply = new Supply();
+      Object.assign(supply, createSupplyDto);
       await this.save(supply);
       return supply;
     } catch (error) {
@@ -53,8 +37,8 @@ export class SupplyRepository extends Repository<Supply> {
   async getSupplyById(supplyId: number): Promise<Supply> {
     try {
       const supply = await this.findOne({ where: { id: supplyId } });
-        if (!supply) {
-          throw new NotFoundException(`Supply with ID ${supplyId} not found`);
+      if (!supply) {
+        throw new NotFoundException(`Supply with ID ${supplyId} not found`);
       }
       return supply;
     } catch (error) {

@@ -1,24 +1,27 @@
-import { Repository } from 'typeorm';
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { SupplyDetails } from '../entities/supply-details.entity';
 import { CreateSupplyDetailsDto } from '../dto/supply-details-dto/create-supply-details-dto';
 import { UpdateSupplyDetailsDto } from '../dto/supply-details-dto/update-supply-details.dto';
 import { Supply } from '../entities/supply.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { SupplyRepository } from './supply.repository';
 
 @Injectable()
 export class SupplyDetailsRepository extends Repository<SupplyDetails> {
-
+  constructor(private dataSource: DataSource) {
+    super(SupplyDetails, dataSource.manager);
+  }
   async createSupplyDetails(
-    createSupplyDetailsDto: CreateSupplyDetailsDto, supply:Supply
+    createSupplyDetailsDto: CreateSupplyDetailsDto,
+    supply: Supply,
   ): Promise<SupplyDetails> {
     try {
       const supplyDetails = new SupplyDetails();
-      
       Object.assign(supplyDetails, createSupplyDetailsDto);
       supplyDetails.supply = supply;
-
       await this.save(supplyDetails);
       return supplyDetails;
     } catch (error) {
@@ -27,18 +30,12 @@ export class SupplyDetailsRepository extends Repository<SupplyDetails> {
     }
   }
 
-  async getSupplyDetails(supplyId: number, supply:Supply): Promise<SupplyDetails[]> {
+  async getSupplyDetails(
+    supplyId: number,
+    supply: Supply,
+  ): Promise<SupplyDetails[]> {
     try {
-      
-      if (!supplyId) {
-        throw new NotFoundException(`Supply with ID ${supplyId} not found`);
-      }
-
-      if (!supply.supplyDetails || supply.supplyDetails.length === 0) {
-        throw new NotFoundException(`No details found for Supply with ID ${supplyId}`);
-      }
-      return supply.supplyDetails
-       
+      return supply.supply_details;
     } catch (error) {
       console.error('Error getting supply details:', error);
       throw new InternalServerErrorException('Could not get supply details');
@@ -46,11 +43,18 @@ export class SupplyDetailsRepository extends Repository<SupplyDetails> {
   }
 
   async updateSupplyDetail(
-    supplyId: number,
+    supplyDetailsId: number,
     updateSupplyDetailsDto: UpdateSupplyDetailsDto,
   ): Promise<SupplyDetails> {
     try {
-      const supplyDetails = await this.findOne({ where: { id: supplyId } });
+      const supplyDetails = await this.findOne({
+        where: { id: supplyDetailsId },
+      });
+      if (!supplyDetails) {
+        throw new NotFoundException(
+          `Supply details with ID ${supplyDetails} not found`,
+        );
+      }
       Object.assign(supplyDetails, updateSupplyDetailsDto);
       await this.save(supplyDetails);
       return supplyDetails;
@@ -60,9 +64,16 @@ export class SupplyDetailsRepository extends Repository<SupplyDetails> {
     }
   }
 
-  async deleteSupplyDetail(id: number): Promise<SupplyDetails> {
+  async deleteSupplyDetails(supplyDetailId: number): Promise<SupplyDetails> {
     try {
-      const supplyDetails = await this.findOne({ where: { id: id } });
+      const supplyDetails = await this.findOne({
+        where: { id: supplyDetailId },
+      });
+      if (!supplyDetails) {
+        throw new NotFoundException(
+          `Supply details with ID ${supplyDetailId} not found`,
+        );
+      }
       await this.remove(supplyDetails);
       return supplyDetails;
     } catch (error) {

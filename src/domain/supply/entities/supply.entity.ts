@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { SupplyDetails } from './supply-details.entity';
 
-@Entity({name:'supply'})
+@Entity({ name: 'supply' })
 export class Supply extends BaseEntity {
   // @AutoMap()
   @PrimaryGeneratedColumn()
@@ -25,45 +25,45 @@ export class Supply extends BaseEntity {
   @Column({ type: 'integer' })
   day: number;
 
-  @Column({  length: 50 })
+  @Column({ length: 50 })
   mine: string;
 
-  @Column({  length: 10 })
+  @Column({ length: 10 })
   material: string;
 
   @Column({ type: 'decimal', precision: 7, scale: 2 })
   weight: number;
 
-  @Column({nullable:true})
+  @Column({ nullable: true })
   source: string;
 
   @Column({ type: 'decimal', precision: 7, scale: 2 })
   density: number;
 
-  @Column({  length: 20 })
+  @Column({ length: 20 })
   operation: string;
 
-  @Column({ type: 'decimal', precision: 7, scale: 2 })
+  @Column({ type: 'decimal', precision: 7, scale: 2, nullable: true })
   service_number: number;
 
-  @Column({  length: 20 })
+  @Column({ length: 20 })
   partner: string;
 
-  @Column({  length: 15 })
+  @Column({ length: 15 })
   status: string;
 
-  @Column({  length: 30 })
+  @Column({ length: 30 })
   measure_type: string;
 
-  @Column({ nullable:true, length: 300 })
+  @Column({ nullable: true, length: 300 })
   description: string;
 
-  // @CreateDateColumn()
-  // createdAt: Date;
+  @CreateDateColumn({ type: 'timestamptz' })
+  created_at: Date;
 
-  // @UpdateDateColumn()
-  // updatedAt: Date;
+  @UpdateDateColumn({ type: 'timestamptz' })
+  updated_at: Date;
 
-  @OneToMany(()=> SupplyDetails , (supplyDetails) => supplyDetails.supply)
-  supplyDetails:SupplyDetails[]
+  @OneToMany(() => SupplyDetails, (supply_details) => supply_details.supply)
+  supply_details: SupplyDetails[];
 }

@@ -9,7 +9,6 @@ import {
   Max,
   IsOptional,
   MaxLength,
-  MinLength,
   IsInt,
 } from 'class-validator';
 
@@ -87,7 +86,7 @@ export class CreateSupplyDto {
   @IsOptional()
   @IsNumber()
   @Min(0, { message: 'Service number must be greater than or equal to 0.' })
-  services_number: number;
+  service_number: number;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -108,8 +107,7 @@ export class CreateSupplyDto {
   @ApiProperty()
   @IsNotEmpty()
   @MaxLength(30, {
-    message:
-      'Measure type is too long. Maximum length is 30 characters.',
+    message: 'Measure type is too long. Maximum length is 30 characters.',
   })
   @IsString()
   measure_type: string;
@@ -117,8 +115,7 @@ export class CreateSupplyDto {
   @ApiProperty()
   @IsOptional()
   @MaxLength(300, {
-    message:
-      'Description is too long. Maximum length is 300 characters.',
+    message: 'Description is too long. Maximum length is 300 characters.',
   })
   @IsString()
   description: string;

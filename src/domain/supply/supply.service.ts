@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectMapper } from '@automapper/nestjs';
 import type { Mapper } from '@automapper/core';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +9,7 @@ import { CreateSupplyDetailsDto } from './dto/supply-details-dto/create-supply-d
 import { SupplyDetailsRepository } from './repositories/supply-details.repository';
 import { SupplyDetails } from './entities/supply-details.entity';
 import { UpdateSupplyDto } from './dto/supply-dto/update-supply.dto';
+import { UpdateSupplyDetailsDto } from './dto/supply-details-dto/update-supply-details.dto';
 
 @Injectable()
 export class SupplyService {
@@ -21,17 +22,21 @@ export class SupplyService {
     // @InjectMapper() private readonly mapper: Mapper,
   ) {}
   async createSupply(createSupplyDto: CreateSupplyDto): Promise<Supply> {
+    console.log(createSupplyDto);
     return await this.supplyRepo.createSupply(createSupplyDto);
   }
 
   async createSupplyDetails(
-    createSupplyDetailsDto: CreateSupplyDetailsDto
+    createSupplyDetailsDto: CreateSupplyDetailsDto,
   ): Promise<SupplyDetails> {
-    
     const supply = await this.supplyRepo.findOne({
       where: { id: createSupplyDetailsDto.supply_id },
-      relations: ['supplyDetails', 'supply'],
+      relations: ['supply_details'],
     });
+
+    if (!supply) {
+      throw new NotFoundException('Supply not found');
+    }
 
     return await this.supplyDetailRepo.createSupplyDetails(
       createSupplyDetailsDto,
@@ -47,20 +52,44 @@ export class SupplyService {
     return await this.supplyRepo.getSupplyById(supplyId);
   }
 
-  async getSupplyDetails(id: number): Promise<SupplyDetails[]> {
+  async getSupplyDetails(supplyId: number): Promise<SupplyDetails[]> {
     const supply = await this.supplyRepo.findOne({
-      where: { id: id },
-      relations: ['supplyDetails', 'supply'],
+      where: { id: supplyId },
+      relations: ['supply_details'],
     });
-
-    return await this.supplyDetailRepo.getSupplyDetails(id, supply);
+    if (!supplyId) {
+      throw new NotFoundException(`Supply with ID ${supplyId} not found`);
+    }
+    if (!supply.supply_details || supply.supply_details.length === 0) {
+      throw new NotFoundException(
+        `No details found for Supply with ID ${supplyId}`,
+      );
+    }
+    return await this.supplyDetailRepo.getSupplyDetails(supplyId, supply);
   }
 
-  async updateSupply(supplyId:number , updateSupplydto:UpdateSupplyDto):Promise<Supply>{
-    return await this.supplyRepo.updateSupply(supplyId,updateSupplydto)
+  async updateSupply(
+    supplyId: number,
+    updateSupplydto: UpdateSupplyDto,
+  ): Promise<Supply> {
+    return await this.supplyRepo.updateSupply(supplyId, updateSupplydto);
   }
 
-  async deleteSupply(supplyId:number):Promise<Supply>{
-    return await this.supplyRepo.deleteSupply(supplyId)
+  async updateSupplyDetails(
+    supplyDetailsId: number,
+    updateSupplyDetailsDto: UpdateSupplyDetailsDto,
+  ): Promise<SupplyDetails> {
+    return await this.supplyDetailRepo.updateSupplyDetail(
+      supplyDetailsId,
+      updateSupplyDetailsDto,
+    );
+  }
+
+  async deleteSupply(supplyId: number): Promise<Supply> {
+    return await this.supplyRepo.deleteSupply(supplyId);
+  }
+
+  async deleteSupplyDetails(supplyDetailsId: number): Promise<SupplyDetails> {
+    return await this.supplyDetailRepo.deleteSupplyDetails(supplyDetailsId);
   }
 }
