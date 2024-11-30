@@ -8,6 +8,7 @@ import {
   Put,
   Delete,
   ParseIntPipe,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { SupplyService } from './supply.service';
@@ -39,7 +40,7 @@ export class SupplyController {
     return this.supplyService.getAllSupplies();
   }
 
-  @Get(':supplyId')
+  @Get('/get/:supplyId')
   @ApiParam({
     name: 'supplyId',
     type: Number,
@@ -47,7 +48,7 @@ export class SupplyController {
     description: 'ID of the supply',
   })
   getSupplyById(
-    @Param('supplyId', ParseIntPipe) supplyId: number,
+    @Param('supplyId', new ParseIntPipe()) supplyId: number,
   ): Promise<Supply> {
     return this.supplyService.getSupplyById(supplyId);
   }
@@ -60,9 +61,14 @@ export class SupplyController {
     description: 'ID of the supply',
   })
   getSupplyDetails(
-    @Param('supplyId', ParseIntPipe) supplyId: number,
+    @Param('supplyId', new ParseIntPipe()) supplyId: number,
   ): Promise<SupplyDetails[]> {
     return this.supplyService.getSupplyDetails(supplyId);
+  }
+
+  @Get('/materials')
+  getMaterials(): Promise<string[]> {
+    return this.supplyService.getMaterials();
   }
 
   @Put('/update/:supplyId')

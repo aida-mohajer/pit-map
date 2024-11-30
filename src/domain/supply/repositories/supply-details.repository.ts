@@ -30,18 +30,6 @@ export class SupplyDetailsRepository extends Repository<SupplyDetails> {
     }
   }
 
-  async getSupplyDetails(
-    supplyId: number,
-    supply: Supply,
-  ): Promise<SupplyDetails[]> {
-    try {
-      return supply.supply_details;
-    } catch (error) {
-      console.error('Error getting supply details:', error);
-      throw new InternalServerErrorException('Could not get supply details');
-    }
-  }
-
   async updateSupplyDetail(
     supplyDetailsId: number,
     updateSupplyDetailsDto: UpdateSupplyDetailsDto,

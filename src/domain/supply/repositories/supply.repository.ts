@@ -82,4 +82,19 @@ export class SupplyRepository extends Repository<Supply> {
       throw new InternalServerErrorException('Could not remove supply');
     }
   }
+
+  async getMaterials(): Promise<string[]> {
+    try {
+      const uniqueMaterials = await this.createQueryBuilder('supply')
+        .select('DISTINCT supply.material', 'material')
+        .getRawMany();
+
+      return uniqueMaterials.map((item) => item.material);
+    } catch (error) {
+      console.error('Error retrieve materials of supply:', error);
+      throw new InternalServerErrorException(
+        'Could not retrieve materials of supply',
+      );
+    }
+  }
 }

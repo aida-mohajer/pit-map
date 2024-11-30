@@ -53,19 +53,21 @@ export class SupplyService {
   }
 
   async getSupplyDetails(supplyId: number): Promise<SupplyDetails[]> {
-    const supply = await this.supplyRepo.findOne({
-      where: { id: supplyId },
-      relations: ['supply_details'],
-    });
     if (!supplyId) {
       throw new NotFoundException(`Supply with ID ${supplyId} not found`);
     }
-    if (!supply.supply_details || supply.supply_details.length === 0) {
+    const supplyDetails = await this.supplyDetailRepo.find({
+      where: { supply: { id: supplyId } },
+    });
+    console.log('Supply Details Retrieved:', supplyDetails);
+
+    if (supplyDetails.length === 0) {
       throw new NotFoundException(
         `No details found for Supply with ID ${supplyId}`,
       );
     }
-    return await this.supplyDetailRepo.getSupplyDetails(supplyId, supply);
+
+    return supplyDetails;
   }
 
   async updateSupply(
@@ -91,5 +93,9 @@ export class SupplyService {
 
   async deleteSupplyDetails(supplyDetailsId: number): Promise<SupplyDetails> {
     return await this.supplyDetailRepo.deleteSupplyDetails(supplyDetailsId);
+  }
+
+  async getMaterials(): Promise<string[]> {
+    return await this.supplyRepo.getMaterials();
   }
 }
